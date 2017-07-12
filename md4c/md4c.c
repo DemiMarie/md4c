@@ -1605,9 +1605,13 @@ md_is_link_destination_B(MD_CTX* ctx, OFF beg, OFF max_end, OFF* p_end,
         if(ISWHITESPACE(off) || ISCNTRL(off))
             break;
 
-        /* Link destination may include balanced pairs of unescaped '(' ')'. */
+        /* Link destination may include balanced pairs of unescaped '(' ')'.
+         * Note we limit the maximal nesting level by 32 to protect us from
+         * https://github.com/jgm/cmark/issues/214 */
         if(CH(off) == _T('(')) {
             parenthesis_level++;
+            if(parenthesis_level > 32)
+                return FALSE;
         } else if(CH(off) == _T(')')) {
             if(parenthesis_level == 0)
                 break;
